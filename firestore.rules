@@ -1,0 +1,364 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ==========================================
+    // FUNÇÕES AUXILIARES
+    // ==========================================
+    
+    // Verifica se o usuário está autenticado
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Verifica se é o próprio usuário
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Valida campos obrigatórios
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+    
+    // Valida que não há campos extras não permitidos
+    function onlyAllowedFields(allowed) {
+      return request.resource.data.keys().hasOnly(allowed);
+    }
+    
+    // Valida string não vazia
+    function isValidString(field) {
+      return request.resource.data[field] is string 
+        && request.resource.data[field].size() > 0
+        && request.resource.data[field].size() <= 500;
+    }
+    
+    // Valida número positivo
+    function isPositiveNumber(field) {
+      return request.resource.data[field] is number 
+        && request.resource.data[field] >= 0;
+    }
+    
+    // Valida array não vazio
+    function isValidArray(field) {
+      return request.resource.data[field] is list
+        && request.resource.data[field].size() > 0;
+    }
+    
+    // Valida URL
+    function isValidUrl(field) {
+      return request.resource.data[field] is string
+        && (request.resource.data[field].matches('^https?://.*') 
+        || request.resource.data[field] == '');
+    }
+    
+    // Valida boolean
+    function isBoolean(field) {
+      return request.resource.data[field] is bool;
+    }
+    
+    // ==========================================
+    // PRODUTOS
+    // ==========================================
+    match /produtos/{produtoId} {
+      // Leitura pública (catálogo)
+      allow read: if true;
+      
+      // Criação apenas autenticados com validação
+      allow create: if isAuthenticated()
+        && hasRequiredFields(['nome', 'marca', 'precoPix', 'precoCartao', 
+                              'tamanhos', 'imagemUrl', 'ativo', 'tipoProdutoId'])
+        && isValidString('nome')
+        && isValidString('marca')
+        && isValidString('imagemUrl')
+        && isPositiveNumber('precoPix')
+        && isPositiveNumber('precoCartao')
+        && isValidArray('tamanhos')
+        && isBoolean('ativo')
+        && isValidUrl('imagemUrl')
+        && request.resource.data.precoPix <= request.resource.data.precoCartao
+        && request.resource.data.tamanhos.size() <= 50;
+      
+      // Atualização apenas autenticados com validação
+      allow update: if isAuthenticated()
+        && hasRequiredFields(['nome', 'marca', 'precoPix', 'precoCartao', 
+                              'tamanhos', 'imagemUrl', 'ativo'])
+        && isValidString('nome')
+        && isValidString('marca')
+        && isValidString('imagemUrl')
+        && isPositiveNumber('precoPix')
+        && isPositiveNumber('precoCartao')
+        && isValidArray('tamanhos')
+        && isBoolean('ativo')
+        && isValidUrl('imagemUrl')
+        && request.resource.data.precoPix <= request.resource.data.precoCartao;
+      
+      // Deleção apenas autenticados
+      allow delete: if isAuthenticated();
+    }
+    
+    // ==========================================
+    // TIPOS DE PRODUTO
+    // ==========================================
+    match /tipos_produto/{tipoId} {
+      // Leitura pública
+      allow read: if true;
+      
+      // Criação apenas autenticados com validação
+      allow create: if isAuthenticated()
+        && hasRequiredFields(['nome', 'nomePropriedade', 'opcoesTamanho', 'ativo'])
+        && isValidString('nome')
+        && isValidString('nomePropriedade')
+        && isValidArray('opcoesTamanho')
+        && isBoolean('ativo')
+        && request.resource.data.opcoesTamanho.size() > 0
+        && request.resource.data.opcoesTamanho.size() <= 100;
+      
+      // Atualização apenas autenticados com validação
+      allow update: if isAuthenticated()
+        && hasRequiredFields(['nome', 'nomePropriedade', 'opcoesTamanho', 'ativo'])
+        && isValidString('nome')
+        && isValidString('nomePropriedade')
+        && isValidArray('opcoesTamanho')
+        && isBoolean('ativo');
+      
+      // Deleção apenas autenticados
+      allow delete: if isAuthenticated();
+    }
+    
+    // ==========================================
+    // CONFIGURAÇÕES
+    // ==========================================
+    match /config/{docId} {
+      // Leitura pública (catálogo precisa das configs)
+      allow read: if true;
+      
+      // Escrita apenas autenticados
+      allow create, update: if isAuthenticated()
+        && hasRequiredFields(['nomeLoja', 'whatsapp'])
+        && isValidString('nomeLoja')
+        && isValidString('whatsapp')
+        && request.resource.data.whatsapp.matches('^[0-9]{10,15}$');
+      
+      // Deleção apenas autenticados
+      allow delete: if isAuthenticated();
+    }
+    
+    // ==========================================
+    // BANNERS
+    // ==========================================
+    match /banners/{bannerId} {
+      // Leitura pública (catálogo exibe banners)
+      allow read: if true;
+      
+      // Criação apenas autenticados com validação
+      allow create: if isAuthenticated()
+        && hasRequiredFields(['imagemUrl', 'ordem', 'ativo'])
+        && isValidUrl('imagemUrl')
+        && isPositiveNumber('ordem')
+        && isBoolean('ativo')
+        && request.resource.data.ordem >= 0
+        && request.resource.data.ordem <= 100;
+      
+      // Atualização apenas autenticados com validação
+      allow update: if isAuthenticated()
+        && hasRequiredFields(['imagemUrl', 'ordem', 'ativo'])
+        && isValidUrl('imagemUrl')
+        && isPositiveNumber('ordem')
+        && isBoolean('ativo');
+      
+      // Deleção apenas autenticados
+      allow delete: if isAuthenticated();
+    }
+    
+    // ==========================================
+    // MÉTRICAS / ANALYTICS
+    // ==========================================
+    match /metricas/{metricaId} {
+      // Leitura apenas autenticados (admin dashboard)
+      allow read: if isAuthenticated();
+      
+      // Criação pública (catálogo registra métricas)
+      // Com validação para evitar spam
+      allow create: if request.resource.data.keys().hasAny(['tipo', 'timestamp'])
+        && request.resource.data.tipo in ['page_view', 'whatsapp_click', 'product_view']
+        && request.resource.data.timestamp == request.time;
+      
+      // Atualização e deleção apenas autenticados
+      allow update, delete: if isAuthenticated();
+    }
+    
+    // ==========================================
+    // USUÁRIOS (ADMIN)
+    // ==========================================
+    match /usuarios/{userId} {
+      // Leitura apenas do próprio perfil
+      allow read: if isOwner(userId);
+      
+      // Criação apenas do próprio perfil
+      allow create: if isOwner(userId)
+        && hasRequiredFields(['email', 'criadoEm'])
+        && request.resource.data.email is string
+        && request.resource.data.email.matches('^[^@]+@[^@]+\\.[^@]+$');
+      
+      // Atualização apenas do próprio perfil
+      allow update: if isOwner(userId);
+      
+      // Deleção apenas do próprio perfil
+      allow delete: if isOwner(userId);
+    }
+    
+    // ==========================================
+    // CARRINHO (OPCIONAL - SE IMPLEMENTAR NO FIREBASE)
+    // ==========================================
+    match /carrinhos/{userId} {
+      // Apenas o próprio usuário pode acessar seu carrinho
+      allow read, write: if isOwner(userId);
+      
+      // Validação dos itens do carrinho
+      allow create, update: if isOwner(userId)
+        && request.resource.data.items is list
+        && request.resource.data.items.size() <= 50
+        && request.resource.data.updatedAt == request.time;
+    }
+    
+    // ==========================================
+    // PEDIDOS (OPCIONAL - SE IMPLEMENTAR)
+    // ==========================================
+    match /pedidos/{pedidoId} {
+      // Apenas autenticados podem ler seus próprios pedidos
+      allow read: if isAuthenticated() 
+        && resource.data.userId == request.auth.uid;
+      
+      // Criação com validação
+      allow create: if isAuthenticated()
+        && hasRequiredFields(['userId', 'items', 'total', 'status', 'criadoEm'])
+        && request.resource.data.userId == request.auth.uid
+        && isValidArray('items')
+        && isPositiveNumber('total')
+        && request.resource.data.status == 'pendente'
+        && request.resource.data.criadoEm == request.time;
+      
+      // Atualização apenas autenticados (admin)
+      allow update: if isAuthenticated()
+        && request.resource.data.userId == resource.data.userId;
+      
+      // Deleção apenas autenticados (admin)
+      allow delete: if isAuthenticated();
+    }
+    
+    // ==========================================
+    // LOGS DE AUDITORIA (OPCIONAL)
+    // ==========================================
+    match /audit_logs/{logId} {
+      // Apenas leitura para autenticados
+      allow read: if isAuthenticated();
+      
+      // Criação automática apenas pelo sistema
+      allow create: if isAuthenticated()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.timestamp == request.time;
+      
+      // Sem atualização ou deleção
+      allow update, delete: if false;
+    }
+    
+    // ==========================================
+    // CATEGORIAS (SE USAR COLLECTION SEPARADA)
+    // ==========================================
+    match /categorias/{categoriaId} {
+      // Leitura pública
+      allow read: if true;
+      
+      // Escrita apenas autenticados
+      allow create, update, delete: if isAuthenticated()
+        && hasRequiredFields(['nome', 'ordem', 'ativo'])
+        && isValidString('nome')
+        && isPositiveNumber('ordem')
+        && isBoolean('ativo');
+    }
+    
+    // ==========================================
+    // MARCAS (SE USAR COLLECTION SEPARADA)
+    // ==========================================
+    match /marcas/{marcaId} {
+      // Leitura pública
+      allow read: if true;
+      
+      // Escrita apenas autenticados
+      allow create, update, delete: if isAuthenticated()
+        && hasRequiredFields(['nome', 'ativo'])
+        && isValidString('nome')
+        && isBoolean('ativo');
+    }
+    
+    // ==========================================
+    // CUPONS DE DESCONTO (OPCIONAL)
+    // ==========================================
+    match /cupons/{cupomId} {
+      // Leitura pública para validação
+      allow read: if true;
+      
+      // Criação e atualização apenas autenticados
+      allow create, update: if isAuthenticated()
+        && hasRequiredFields(['codigo', 'desconto', 'ativo', 'validade'])
+        && isValidString('codigo')
+        && isPositiveNumber('desconto')
+        && isBoolean('ativo')
+        && request.resource.data.desconto >= 0
+        && request.resource.data.desconto <= 100;
+      
+      // Deleção apenas autenticados
+      allow delete: if isAuthenticated();
+    }
+    
+    // ==========================================
+    // NOTIFICAÇÕES (OPCIONAL)
+    // ==========================================
+    match /notificacoes/{userId}/mensagens/{mensagemId} {
+      // Apenas o usuário pode ver suas notificações
+      allow read: if isOwner(userId);
+      
+      // Criação por sistema autenticado
+      allow create: if isAuthenticated();
+      
+      // Atualização para marcar como lida
+      allow update: if isOwner(userId)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lida']);
+      
+      // Deleção pelo próprio usuário
+      allow delete: if isOwner(userId);
+    }
+    
+    // ==========================================
+    // REVIEWS/AVALIAÇÕES (OPCIONAL)
+    // ==========================================
+    match /reviews/{reviewId} {
+      // Leitura pública
+      allow read: if true;
+      
+      // Criação autenticada com validação
+      allow create: if isAuthenticated()
+        && hasRequiredFields(['produtoId', 'userId', 'rating', 'comentario'])
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.rating >= 1
+        && request.resource.data.rating <= 5
+        && request.resource.data.comentario.size() <= 1000;
+      
+      // Atualização apenas pelo autor
+      allow update: if isAuthenticated()
+        && resource.data.userId == request.auth.uid;
+      
+      // Deleção pelo autor ou admin
+      allow delete: if isAuthenticated()
+        && resource.data.userId == request.auth.uid;
+    }
+    
+    // ==========================================
+    // REGRA PADRÃO - NEGAR TUDO QUE NÃO FOI ESPECIFICADO
+    // ==========================================
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
