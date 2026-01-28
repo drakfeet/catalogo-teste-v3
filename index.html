@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Catálogo de produtos online">
+  <title>Catálogo de Produtos</title>
+  <link rel="stylesheet" href="assets/css/style.css"/>
+</head>
+<body>
+  <!-- Preloader -->
+  <div class="page-loader" id="pageLoader">
+    <div class="loader-spinner"></div>
+    <p>Carregando catálogo...</p>
+  </div>
+
+  <!-- Header Fixo -->
+  <div class="header-sticky">
+    <!-- Aviso de Taxa de Entrega -->
+    <div class="aviso-entrega" id="avisoEntrega" style="display: none;">
+      <div class="container">
+        <span class="aviso-icon">🏍️</span>
+        <span class="aviso-texto">Taxa de Entrega Via Motoboy: <strong id="valorTaxa">R$ 8,00</strong></span>
+      </div>
+    </div>
+
+    <!-- Header Principal -->
+    <header class="header">
+      <div class="container header-flex">
+        <!-- Menu Hambúrguer -->
+        <button class="btn-menu-toggle" id="menuToggle" aria-label="Abrir menu" aria-expanded="false">
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+        </button>
+
+        <!-- Logo -->
+        <a href="#" class="logo-link" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;">
+          <div id="logoContainer" class="logo-container">
+            <span id="nomeLoja">Carregando...</span>
+          </div>
+        </a>
+
+        <!-- Menu Desktop -->
+        <nav class="menu-desktop-nav" id="menuDesktopNav">
+          <ul class="menu-desktop-list" id="menuDesktopList">
+            <li><a href="#" class="menu-link active" data-categoria="todas">Início</a></li>
+            <!-- Categorias serão inseridas aqui -->
+          </ul>
+        </nav>
+
+        <!-- Ações do Header -->
+        <div class="header-actions">
+          <!-- Busca Desktop -->
+          <div class="header-search-desktop">
+            <input type="text" id="headerSearch" class="header-search-input" placeholder="Buscar produtos...">
+            <button class="header-search-btn" aria-label="Buscar">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Carrinho -->
+          <button class="btn-cart" id="btnCart" aria-label="Abrir carrinho">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 2L7 6m6-4l2 4M3 8h18l-1 8H4L3 8z"/>
+              <circle cx="7" cy="20" r="2"/>
+              <circle cx="17" cy="20" r="2"/>
+            </svg>
+            <span class="cart-badge" id="cartBadge" style="display: none;">0</span>
+          </button>
+
+          <!-- Toggle de Tema -->
+          <button class="btn-theme-toggle" id="themeToggle" aria-label="Alternar tema">
+            <span class="theme-icon">🌙</span>
+          </button>
+          
+          <!-- Botão Filtros Mobile -->
+          <button class="btn-filtros-mobile" id="btnFiltrosMobile">
+            <span class="icon">⚙️</span>
+            <span class="text">Filtros</span>
+          </button>
+        </div>
+      </div>
+    </header>
+  </div>
+
+  <!-- Menu Mobile (Hambúrguer) -->
+  <div class="menu-overlay" id="menuOverlay"></div>
+  <nav class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-header">
+      <div id="logoContainerMobile" class="logo-container-mobile">
+        <span id="nomeLojaMobile">Carregando...</span>
+      </div>
+      <button class="btn-close-menu" id="btnCloseMenu" aria-label="Fechar menu">
+        <span>✕</span>
+      </button>
+    </div>
+    <div class="mobile-menu-content">
+      <div class="mobile-menu-categorias" id="mobileMenuCategorias">
+        <!-- Gerado dinamicamente -->
+      </div>
+      <div class="mobile-menu-footer">
+        <button class="btn-theme-toggle-mobile" id="themeToggleMobile">
+          <span class="theme-icon">🌙</span>
+          <span class="theme-text">Tema Escuro</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Banner Slider -->
+  <section class="banner-slider" id="bannerSlider" style="display: none;">
+    <div class="slider-container" id="sliderContainer">
+      <!-- Slides serão inseridos aqui -->
+    </div>
+    <div class="slider-controls">
+      <button class="slider-btn slider-prev" id="sliderPrev" aria-label="Anterior">‹</button>
+      <button class="slider-btn slider-next" id="sliderNext" aria-label="Próximo">›</button>
+    </div>
+    <div class="slider-dots" id="sliderDots"></div>
+  </section>
+
+  <!-- Hero Section / Banner -->
+  <section class="hero-section" id="heroSection" style="display: none;">
+    <div class="hero-background"></div>
+    <div class="container hero-content">
+      <div class="hero-text">
+        <h1 class="hero-title" id="heroTitle">Bem-vindo à nossa loja</h1>
+        <p class="hero-subtitle" id="heroSubtitle">Os melhores produtos com os melhores preços</p>
+        <a href="#produtos" class="btn-hero">Ver Produtos</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Popup de Aviso -->
+  <div class="popup-overlay" id="popupOverlay" style="display: none;">
+    <div class="popup-content" id="popupContent">
+      <button class="popup-close" id="popupClose" aria-label="Fechar">✕</button>
+      <div class="popup-body">
+        <h3 class="popup-title" id="popupTitle">Aviso</h3>
+        <p class="popup-text" id="popupText"></p>
+        <div class="popup-actions">
+          <a href="#" class="btn-popup" id="btnPopup" target="_blank"></a>
+          <button class="btn-popup-close" id="btnPopupClose">Fechar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <main class="main-content" id="produtos">
+    <div class="container">
+      <!-- Overlay para filtros mobile -->
+      <div class="filtros-overlay" id="filtrosOverlay"></div>
+
+      <!-- Sidebar de Filtros (Fixo) -->
+      <aside class="filtros-sidebar-fixed" id="filtrosSidebar">
+        <div class="filtros-header">
+          <h2>Filtros</h2>
+          <button class="btn-fechar-filtros" id="btnFecharFiltros">✕</button>
+        </div>
+
+        <div class="filtros-content">
+          <!-- Busca Simples -->
+          <div class="filtro-grupo">
+            <h3>Buscar</h3>
+            <input type="text" id="campoBusca" class="campo-busca" placeholder="Digite para buscar...">
+          </div>
+
+          <!-- Filtros de Marca -->
+          <div class="filtro-grupo">
+            <h3>Marca</h3>
+            <div id="filtrosMarca" class="filtro-opcoes">
+              <!-- Gerado dinamicamente -->
+            </div>
+          </div>
+
+          <!-- Filtros de Tamanho -->
+          <div class="filtro-grupo">
+            <h3>Tamanho</h3>
+            <div id="filtrosTamanho" class="filtro-opcoes">
+              <!-- Gerado dinamicamente -->
+            </div>
+          </div>
+
+          <button id="btnLimparFiltros" class="btn-limpar-full">Limpar Filtros</button>
+        </div>
+      </aside>
+
+      <!-- Área de Produtos -->
+      <section class="produtos-area">
+        <div class="produtos-header-modern">
+          <div class="header-left">
+            <h1 class="produtos-title">Nossos Produtos</h1>
+            <p id="contadorProdutos" class="contador-modern">0 produtos encontrados</p>
+          </div>
+          <div class="header-right">
+            <button class="btn-view-toggle active" data-view="grid" aria-label="Visualização em grade">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M2 2h6v6H2V2zm0 8h6v6H2v-6zm8-8h6v6h-6V2zm0 8h6v6h-6v-6z"/>
+              </svg>
+            </button>
+            <button class="btn-view-toggle" data-view="list" aria-label="Visualização em lista">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M2 4h16v2H2V4zm0 4h16v2H2V8zm0 4h16v2H2v-2zm0 4h16v2H2v-2z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Produtos por Categoria -->
+        <div id="produtosPorCategoria" class="produtos-container">
+          <!-- Gerado dinamicamente -->
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Carrinho Lateral -->
+  <div class="cart-overlay" id="cartOverlay"></div>
+  <aside class="cart-sidebar" id="cartSidebar">
+    <div class="cart-header">
+      <h2>Carrinho</h2>
+      <button class="cart-close" id="cartClose" aria-label="Fechar carrinho">✕</button>
+    </div>
+    <div class="cart-body">
+      <div class="cart-items" id="cartItems">
+        <!-- Itens serão inseridos aqui -->
+      </div>
+    </div>
+    <div class="cart-footer">
+      <div class="cart-total">
+        <span>Total:</span>
+        <strong id="cartTotal">R$ 0,00</strong>
+      </div>
+      <button class="btn-cart-checkout" id="btnCartCheckout">
+        Finalizar Pedido
+      </button>
+    </div>
+  </aside>
+
+  <!-- WhatsApp Flutuante -->
+  <div class="whatsapp-flutuante" id="whatsappFlutuante" style="display: none;">
+    <div class="whatsapp-tooltip" id="whatsappTooltip">Precisa de Ajuda?</div>
+    <a href="#" class="whatsapp-btn" id="whatsappBtnFlutuante" target="_blank">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+        <path d="M16 0C7.163 0 0 7.163 0 16c0 2.825.738 5.487 2.038 7.787L0 32l8.4-2.2A15.93 15.93 0 0016 32c8.837 0 16-7.163 16-16S24.837 0 16 0zm0 29.45c-2.55 0-4.95-.7-7.025-1.9l-.5-.3-5.188 1.363 1.388-5.063-.325-.525A13.363 13.363 0 012.55 16c0-7.425 6.038-13.45 13.45-13.45S29.45 8.575 29.45 16 23.425 29.45 16 29.45z" fill="#fff"/>
+        <path d="M23.738 19.463c-.4-.2-2.363-1.163-2.725-1.3-.363-.125-.625-.188-.888.2-.263.375-1.013 1.3-1.238 1.563-.225.263-.45.3-.85.1-.4-.2-1.7-.625-3.238-2-.2-.213-3.063-2.663-3.063-2.663s-.363-.45-.138-.688c.188-.2.4-.525.6-.788.2-.262.263-.45.4-.712.137-.263.075-.525-.037-.725-.113-.2-1.113-2.663-1.525-3.65-.4-.963-.8-.825-1.1-.838-.275-.013-.6-.013-.875-.013s-.8.113-1.225.563c-.425.45-1.625 1.588-1.625 3.863s1.663 4.475 1.888 4.775c.238.3 3.313 5.063 8.013 7.088 4.7 2.025 4.7.675 5.55.625.85-.05 2.738-1.125 3.125-2.2.388-1.075.388-2 .275-2.2-.113-.2-.413-.313-.813-.513z" fill="#fff"/>
+      </svg>
+    </a>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <!-- Sobre -->
+        <div class="footer-col">
+          <h3 class="footer-title" id="footerNomeLoja">Loja</h3>
+          <p class="footer-description">Sua loja de confiança com os melhores produtos e preços.</p>
+        </div>
+
+        <!-- Links Rápidos -->
+        <div class="footer-col">
+          <h3 class="footer-title">Links Rápidos</h3>
+          <ul class="footer-links">
+            <li><a href="#produtos">Produtos</a></li>
+            <li><a href="#" id="footerLinkSobre">Sobre</a></li>
+            <li><a href="#" id="footerLinkContato">Contato</a></li>
+          </ul>
+        </div>
+
+        <!-- Contato -->
+        <div class="footer-col">
+          <h3 class="footer-title">Contato</h3>
+          <ul class="footer-contact">
+            <li id="footerTelefone" style="display: none;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
+              </svg>
+              <span id="footerTelefoneText"></span>
+            </li>
+            <li id="footerEmail" style="display: none;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                <polyline points="22,6 12,13 2,6"/>
+              </svg>
+              <span id="footerEmailText"></span>
+            </li>
+            <li id="footerEndereco" style="display: none;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+                <circle cx="12" cy="10" r="3"/>
+              </svg>
+              <span id="footerEnderecoText"></span>
+            </li>
+            <li id="footerWhatsApp" style="display: none;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+              </svg>
+              <span id="footerWhatsAppText"></span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Redes Sociais -->
+        <div class="footer-col">
+          <h3 class="footer-title">Siga-nos</h3>
+          <div class="footer-social" id="footerSocial">
+            <!-- Redes sociais serão inseridas aqui -->
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p class="footer-copy">&copy; 2025 <span id="nomeLojaFooter">Catálogo</span>. Todos os direitos reservados.</p>
+        <p class="footer-creditos">
+          Desenvolvido por 
+          <a href="https://instagram.com/mateusfams" target="_blank" class="dev-link">
+            Mateus Andrade
+          </a>
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  
+  <!-- Configuração Firebase -->
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAZ90xAptvBeRDFl52FI7-WJJD14I6YKk4",
+  authDomain: "drak-feet-admin.firebaseapp.com",
+  projectId: "drak-feet-admin",
+  storageBucket: "drak-feet-admin.firebasestorage.app",
+  messagingSenderId: "525123704162",
+  appId: "1:525123704162:web:ea0a3bc86663334a79c83b",
+  measurementId: "G-EFERT7RZZ5"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    console.info('✅ Firebase inicializado');
+  </script>
+
+  <!-- Scripts -->
+  <script src="assets/js/theme.service.js"></script>
+  <script src="assets/js/menu.service.js"></script>
+  <script src="assets/js/cart.service.js"></script>
+  <script src="assets/js/data.service.js"></script>
+  <script src="assets/js/tracking.service.js"></script>
+  <script src="assets/js/catalog.render.js"></script>
+  <script src="assets/js/filters.js"></script>
+  <script src="assets/js/banner-slider.js"></script>
+
+  <!-- Inicialização -->
+  <script>
+    async function inicializarCatalogo() {
+      try {
+        // Inicializar serviços
+        ThemeService.init();
+        MenuService.init();
+        CartService.init();
+        DataService.init();
+
+        const config = await DataService.buscarConfig();
+        
+        // Nome da loja
+        document.getElementById('nomeLojaFooter').textContent = config.nomeLoja;
+        document.title = `${config.nomeLoja} - Catálogo`;
+        
+        // Logo ou nome
+        const logoContainer = document.getElementById('logoContainer');
+        const logoContainerMobile = document.getElementById('logoContainerMobile');
+        if (config.logoUrl && config.logoUrl.trim() !== '') {
+          logoContainer.innerHTML = `<img src="${config.logoUrl}" alt="${config.nomeLoja}" class="logo-img">`;
+          if (logoContainerMobile) {
+            logoContainerMobile.innerHTML = `<img src="${config.logoUrl}" alt="${config.nomeLoja}" class="logo-img">`;
+          }
+        } else {
+          document.getElementById('nomeLoja').textContent = config.nomeLoja;
+          if (document.getElementById('nomeLojaMobile')) {
+            document.getElementById('nomeLojaMobile').textContent = config.nomeLoja;
+          }
+        }
+        
+        CatalogRender.setConfig(config);
+
+        // Taxa de entrega
+        if (config.taxaMotoboy && config.taxaMotoboy > 0) {
+          const avisoDiv = document.getElementById('avisoEntrega');
+          const valorSpan = document.getElementById('valorTaxa');
+          valorSpan.textContent = `R$ ${config.taxaMotoboy.toFixed(2).replace('.', ',')}`;
+          avisoDiv.style.display = 'block';
+        }
+
+        // Hero Section
+        const heroSection = document.getElementById('heroSection');
+        if (config.heroTitulo && config.heroTitulo.trim() !== '') {
+          const heroTitle = document.getElementById('heroTitle');
+          const heroSubtitle = document.getElementById('heroSubtitle');
+          if (heroTitle) heroTitle.textContent = config.heroTitulo;
+          if (heroSubtitle) heroSubtitle.textContent = config.heroSubtitulo || 'Os melhores produtos com os melhores preços';
+          if (heroSection) heroSection.style.display = 'block';
+        }
+
+        // Banner Slider
+        if (config.banners && Array.isArray(config.banners) && config.banners.length > 0) {
+          BannerSlider.init(config.banners);
+        }
+
+        // Popup de Aviso
+        if (config.avisoTexto && config.avisoTexto.trim() !== '') {
+          const popupOverlay = document.getElementById('popupOverlay');
+          const popupText = document.getElementById('popupText');
+          const popupTitle = document.getElementById('popupTitle');
+          const btnPopup = document.getElementById('btnPopup');
+          const btnPopupClose = document.getElementById('btnPopupClose');
+          const popupClose = document.getElementById('popupClose');
+          
+          popupTitle.textContent = config.avisoTitulo || 'Aviso Importante';
+          popupText.textContent = config.avisoTexto;
+          
+          if (config.avisoBotaoTexto && config.avisoBotaoUrl) {
+            btnPopup.textContent = config.avisoBotaoTexto;
+            btnPopup.href = config.avisoBotaoUrl;
+            btnPopup.style.display = 'inline-block';
+          } else {
+            btnPopup.style.display = 'none';
+          }
+          
+          popupOverlay.style.display = 'flex';
+          
+          // Fechar popup
+          const fecharPopup = () => {
+            popupOverlay.style.display = 'none';
+            if (config.avisoNaoMostrarNovamente) {
+              localStorage.setItem('popupFechado', 'true');
+            }
+          };
+          
+          if (btnPopupClose) btnPopupClose.addEventListener('click', fecharPopup);
+          if (popupClose) popupClose.addEventListener('click', fecharPopup);
+          popupOverlay.addEventListener('click', (e) => {
+            if (e.target === popupOverlay) fecharPopup();
+          });
+          
+          // Verificar se já foi fechado antes
+          if (config.avisoNaoMostrarNovamente && localStorage.getItem('popupFechado') === 'true') {
+            popupOverlay.style.display = 'none';
+          }
+        }
+
+        // Informações de contato no footer
+        if (config.telefone) {
+          document.getElementById('footerTelefone').style.display = 'flex';
+          document.getElementById('footerTelefoneText').textContent = config.telefone;
+        }
+        if (config.email) {
+          document.getElementById('footerEmail').style.display = 'flex';
+          document.getElementById('footerEmailText').textContent = config.email;
+        }
+        if (config.endereco) {
+          document.getElementById('footerEndereco').style.display = 'flex';
+          document.getElementById('footerEnderecoText').textContent = config.endereco;
+        }
+        if (config.whatsapp) {
+          document.getElementById('footerWhatsApp').style.display = 'flex';
+          document.getElementById('footerWhatsAppText').textContent = config.whatsapp.replace(/^55/, '');
+        }
+        
+        // Nome da loja no footer
+        document.getElementById('footerNomeLoja').textContent = config.nomeLoja;
+
+        // WhatsApp flutuante
+        if (config.whatsappFlutuante !== false) {
+          const whatsappDiv = document.getElementById('whatsappFlutuante');
+          const tooltip = document.getElementById('whatsappTooltip');
+          const btn = document.getElementById('whatsappBtnFlutuante');
+          
+          tooltip.textContent = config.whatsappMensagemFlutuante || 'Precisa de Ajuda?';
+          btn.href = `https://wa.me/${config.whatsapp}`;
+          whatsappDiv.style.display = 'block';
+        }
+
+        TrackingService.init(config);
+
+        CatalogRender.mostrarLoading();
+        const produtos = await DataService.buscarProdutos();
+
+        CatalogRender.renderizarPorCategorias(produtos);
+        Filters.init(produtos, config);
+        Filters.atualizarContadores(produtos.length);
+        
+        // Renderizar menu mobile
+        CatalogRender.renderizarMenuMobile(produtos);
+        
+        // Configurar toggle de tema mobile
+        const themeToggleMobile = document.getElementById('themeToggleMobile');
+        if (themeToggleMobile) {
+          themeToggleMobile.addEventListener('click', () => {
+            const newTheme = ThemeService.toggle();
+            const themeText = themeToggleMobile.querySelector('.theme-text');
+            if (themeText) {
+              themeText.textContent = newTheme === 'dark' ? 'Tema Escuro' : 'Tema Claro';
+            }
+          });
+        }
+        
+        // Configurar toggle de tema desktop
+        const themeToggle = document.getElementById('themeToggle');
+        if (themeToggle) {
+          themeToggle.addEventListener('click', () => {
+            ThemeService.toggle();
+          });
+        }
+
+        // Configurar carrinho
+        const btnCart = document.getElementById('btnCart');
+        const cartSidebar = document.getElementById('cartSidebar');
+        const cartOverlay = document.getElementById('cartOverlay');
+        const cartClose = document.getElementById('cartClose');
+        const btnCartCheckout = document.getElementById('btnCartCheckout');
+
+        const abrirCarrinho = () => {
+          cartSidebar.classList.add('active');
+          cartOverlay.classList.add('active');
+          document.body.style.overflow = 'hidden';
+        };
+
+        const fecharCarrinho = () => {
+          cartSidebar.classList.remove('active');
+          cartOverlay.classList.remove('active');
+          document.body.style.overflow = '';
+        };
+
+        if (btnCart) btnCart.addEventListener('click', abrirCarrinho);
+        if (cartClose) cartClose.addEventListener('click', fecharCarrinho);
+        if (cartOverlay) cartOverlay.addEventListener('click', fecharCarrinho);
+        
+        if (btnCartCheckout) {
+          btnCartCheckout.addEventListener('click', () => {
+            if (CartService.items.length === 0) {
+              alert('Seu carrinho está vazio');
+              return;
+            }
+            
+            const mensagem = CartService.generateWhatsAppMessage(config);
+            const whatsappUrl = `https://wa.me/${config.whatsapp}?text=${encodeURIComponent(mensagem)}`;
+            window.open(whatsappUrl, '_blank');
+          });
+        }
+
+        // Busca no header
+        const headerSearch = document.getElementById('headerSearch');
+        if (headerSearch) {
+          headerSearch.addEventListener('input', (e) => {
+            Filters.termoBusca = e.target.value.toLowerCase();
+            Filters.aplicarFiltros();
+          });
+        }
+
+        // Configurar visualização grid/lista
+        const viewToggles = document.querySelectorAll('.btn-view-toggle');
+        viewToggles.forEach(btn => {
+          btn.addEventListener('click', () => {
+            const view = btn.dataset.view;
+            const container = document.getElementById('produtosPorCategoria');
+            
+            viewToggles.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            if (view === 'list') {
+              container.classList.add('view-list');
+              container.querySelectorAll('.produtos-grid').forEach(grid => {
+                grid.classList.add('list-view');
+              });
+            } else {
+              container.classList.remove('view-list');
+              container.querySelectorAll('.produtos-grid').forEach(grid => {
+                grid.classList.remove('list-view');
+              });
+            }
+          });
+        });
+
+        // Registrar visualização de página
+        await DataService.registrarVisualizacao();
+
+        // Remover preloader
+        setTimeout(() => {
+          document.getElementById('pageLoader').classList.add('fade-out');
+          setTimeout(() => {
+            document.getElementById('pageLoader').style.display = 'none';
+          }, 500);
+        }, 800);
+
+      } catch (error) {
+        console.error('❌ Erro ao inicializar catálogo:', error);
+        document.getElementById('pageLoader').innerHTML = `
+          <div class="error-state">
+            <p>❌ Erro ao carregar. Recarregue a página.</p>
+          </div>
+        `;
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', inicializarCatalogo);
+    } else {
+      inicializarCatalogo();
+    }
+  </script>
+</body>
+</html>

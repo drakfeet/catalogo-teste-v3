@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Painel Administrativo</title>
+  <link rel="stylesheet" href="assets/css/admin.css">
+</head>
+<body class="login-page">
+  <div class="login-container">
+    <div class="login-box">
+      <div class="login-header">
+        <h1>🔐 Admin</h1>
+        <p>Faça login para acessar o painel</p>
+      </div>
+
+      <form id="loginForm" class="login-form">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input 
+            type="email" 
+            id="email" 
+            name="email" 
+            required 
+            placeholder="seu@email.com"
+            autocomplete="email">
+        </div>
+
+        <div class="form-group">
+          <label for="password">Senha</label>
+          <input 
+            type="password" 
+            id="password" 
+            name="password" 
+            required 
+            placeholder="••••••••"
+            autocomplete="current-password">
+        </div>
+
+        <div id="errorMessage" class="error-message" style="display: none;"></div>
+
+        <button type="submit" class="btn btn-primary btn-block">
+          Entrar
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  
+  <!-- Scripts -->
+  <script src="assets/js/firebase.js"></script>
+  <script src="assets/js/auth.service.js"></script>
+  <script src="assets/js/auth.guard.js"></script>
+  <script src="assets/js/auth.core.js"></script>
+
+  <script>
+  // Garantir que AuthService existe
+  if (typeof AuthService === 'undefined') {
+    console.error('AuthService não foi carregado');
+  }
+
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const errorDiv = document.getElementById('errorMessage');
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+
+    errorDiv.style.display = 'none';
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Entrando...';
+
+    try {
+      const result = await AuthService.login(email, password);
+
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const redirect = urlParams.get('redirect') || '/admin/index.html';
+      window.location.href = redirect;
+
+    } catch (err) {
+      errorDiv.textContent = err.message || 'Erro ao fazer login';
+      errorDiv.style.display = 'block';
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Entrar';
+    }
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Configurações de Comunicação - Admin</title>
+  <link rel="stylesheet" href="../assets/css/admin.css">
+  <link rel="stylesheet" href="../assets/css/admin-mobile.css">
+</head>
+<body>
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h2>📦 Admin</h2>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="../index.html" class="nav-item">
+          <span class="icon">📊</span>
+          <span>Dashboard</span>
+        </a>
+        <a href="../produtos.html" class="nav-item">
+          <span class="icon">📦</span>
+          <span>Produtos</span>
+        </a>
+        <a href="../metricas.html" class="nav-item">
+          <span class="icon">📈</span>
+          <span>Métricas</span>
+        </a>
+        
+        <!-- Submenu Configurações -->
+        <div class="nav-submenu">
+          <span class="nav-submenu-title">⚙️ Configurações</span>
+          <a href="visual.html" class="nav-item-sub">
+            <span class="icon">🎨</span>
+            <span>Visual</span>
+          </a>
+          <a href="produtos.html" class="nav-item-sub">
+            <span class="icon">📦</span>
+            <span>Produtos</span>
+          </a>
+          <a href="pagamento.html" class="nav-item-sub">
+            <span class="icon">💳</span>
+            <span>Pagamento</span>
+          </a>
+          <a href="comunicacao.html" class="nav-item-sub active">
+            <span class="icon">💬</span>
+            <span>Comunicação</span>
+          </a>
+          <a href="tracking.html" class="nav-item-sub">
+            <span class="icon">📊</span>
+            <span>Tracking</span>
+          </a>
+        </div>
+        
+        <a href="https://catalogo.drakfeet.com" class="nav-item" target="_blank">
+          <span class="icon">🌐</span>
+          <span>Ver Catálogo</span>
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <button id="logoutBtn" class="btn-logout">Sair</button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="topbar">
+        <h1>💬 Configurações de Comunicação</h1>
+      </header>
+
+      <div class="container">
+        <form id="configComunicacaoForm" class="form-card">
+          
+          <!-- WhatsApp -->
+          <section class="config-section">
+            <h2>📱 WhatsApp</h2>
+            
+            <div class="form-group">
+              <label for="whatsapp">Número do WhatsApp *</label>
+              <input type="text" id="whatsapp" name="whatsapp" required 
+                     placeholder="5511999999999" pattern="[0-9]{10,15}">
+              <small>Formato: código do país + DDD + número (apenas números)</small>
+            </div>
+
+            <div class="form-group">
+              <label for="mensagemPadrao">Mensagem Padrão do WhatsApp</label>
+              <textarea id="mensagemPadrao" name="mensagemPadrao" rows="8"></textarea>
+              <div class="variaveis-disponiveis">
+                <strong>Variáveis disponíveis:</strong>
+                <div class="variaveis-list">
+                  <span class="variavel-tag">{produto}</span>
+                  <span class="variavel-tag">{marca}</span>
+                  <span class="variavel-tag">{tamanho}</span>
+                  <span class="variavel-tag">{pagamento}</span>
+                  <span class="variavel-tag">{valor}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="preview-mensagem">
+              <h4>📱 Pré-visualização da Mensagem:</h4>
+              <div class="whatsapp-preview" id="previewMensagem">
+                <!-- Gerado via JS -->
+              </div>
+            </div>
+          </section>
+
+          <!-- Botão Flutuante -->
+          <section class="config-section">
+            <h2>💬 Botão Flutuante do WhatsApp</h2>
+            
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" id="whatsappFlutuante">
+                Ativar botão flutuante do WhatsApp
+              </label>
+              <small>Exibe um botão fixo no canto inferior direito do catálogo</small>
+            </div>
+
+            <div class="form-group">
+              <label for="whatsappMensagemFlutuante">Mensagem do Tooltip</label>
+              <input type="text" id="whatsappMensagemFlutuante" 
+                     placeholder="Precisa de Ajuda?">
+              <small>Texto que aparece ao passar o mouse sobre o botão</small>
+            </div>
+
+            <div class="form-group">
+              <label for="whatsappMensagemInicial">Mensagem Inicial (Botão Flutuante)</label>
+              <textarea id="whatsappMensagemInicial" rows="3"></textarea>
+              <small>Mensagem enviada quando o cliente clica no botão flutuante</small>
+            </div>
+          </section>
+
+          <!-- Horário de Atendimento -->
+          <section class="config-section">
+            <h2>🕐 Horário de Atendimento</h2>
+            
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" id="exibirHorario">
+                Exibir horário de atendimento
+              </label>
+            </div>
+
+            <div class="horarios-grid" id="horariosContainer">
+              <div class="horario-item">
+                <label>Segunda a Sexta:</label>
+                <div class="horario-inputs">
+                  <input type="time" id="horarioSegSexInicio" value="09:00">
+                  <span>até</span>
+                  <input type="time" id="horarioSegSexFim" value="18:00">
+                </div>
+              </div>
+
+              <div class="horario-item">
+                <label>Sábado:</label>
+                <div class="horario-inputs">
+                  <input type="time" id="horarioSabInicio" value="09:00">
+                  <span>até</span>
+                  <input type="time" id="horarioSabFim" value="13:00">
+                </div>
+              </div>
+
+              <div class="horario-item">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="atendeDOM">
+                  Atende aos domingos
+                </label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="mensagemForaHorario">Mensagem Fora do Horário</label>
+              <textarea id="mensagemForaHorario" rows="2"></textarea>
+              <small>Exibida quando o cliente tenta contato fora do horário</small>
+            </div>
+          </section>
+
+          <!-- Contatos Adicionais -->
+          <section class="config-section">
+            <h2>📞 Contatos Adicionais</h2>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label for="telefone">Telefone Fixo</label>
+                <input type="tel" id="telefone" placeholder="(11) 1234-5678">
+              </div>
+
+              <div class="form-group">
+                <label for="email">E-mail</label>
+                <input type="email" id="email" placeholder="contato@suaoja.com">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="endereco">Endereço da Loja Física</label>
+              <textarea id="endereco" rows="2"></textarea>
+            </div>
+          </section>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">💾 Salvar Configurações</button>
+          </div>
+        </form>
+      </div>
+    </main>
+  </div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  
+  <script src="../assets/js/config.js"></script>
+  <script src="../assets/js/crypto.service.js"></script>
+  <script src="../assets/js/firebase.js"></script>
+  <script src="../assets/js/auth.core.js"></script>
+  <script src="../assets/js/auth.guard.js"></script>
+  <script src="../assets/js/session.manager.js"></script>
+  <script src="../assets/js/config.service.js"></script>
+
+  <script>
+    // Atualizar preview da mensagem
+    function atualizarPreview() {
+      const mensagem = document.getElementById('mensagemPadrao').value;
+      const preview = document.getElementById('previewMensagem');
+
+      const mensagemPreview = mensagem
+        .replace(/{produto}/g, 'Tênis Nike Air Max')
+        .replace(/{marca}/g, 'Nike')
+        .replace(/{tamanho}/g, '42')
+        .replace(/{pagamento}/g, 'PIX')
+        .replace(/{valor}/g, '299,90');
+
+      preview.innerHTML = `<pre>${mensagemPreview || 'Digite uma mensagem...'}</pre>`;
+    }
+
+    document.getElementById('mensagemPadrao').addEventListener('input', atualizarPreview);
+
+    // Carregar configurações
+    async function carregarConfiguracoes() {
+      const config = await ConfigService.buscar();
+
+      document.getElementById('whatsapp').value = config.whatsapp || '';
+      document.getElementById('mensagemPadrao').value = config.mensagemPadrao || 
+        'Olá! Gostaria de fazer um pedido:\n\n*Produto:* {produto}\n*Marca:* {marca}\n*Tamanho:* {tamanho}\n*Pagamento:* {pagamento}\n*Valor:* R$ {valor}';
+      
+      document.getElementById('whatsappFlutuante').checked = config.whatsappFlutuante !== false;
+      document.getElementById('whatsappMensagemFlutuante').value = 
+        config.whatsappMensagemFlutuante || 'Precisa de Ajuda?';
+      document.getElementById('whatsappMensagemInicial').value = 
+        config.whatsappMensagemInicial || 'Olá! Gostaria de mais informações.';
+
+      // Horários
+      document.getElementById('exibirHorario').checked = config.exibirHorario === true;
+      document.getElementById('horarioSegSexInicio').value = config.horarioSegSexInicio || '09:00';
+      document.getElementById('horarioSegSexFim').value = config.horarioSegSexFim || '18:00';
+      document.getElementById('horarioSabInicio').value = config.horarioSabInicio || '09:00';
+      document.getElementById('horarioSabFim').value = config.horarioSabFim || '13:00';
+      document.getElementById('atendeDOM').checked = config.atendeDomingo === true;
+      document.getElementById('mensagemForaHorario').value = 
+        config.mensagemForaHorario || 'No momento estamos fora do horário de atendimento. Retornaremos em breve!';
+
+      // Contatos
+      document.getElementById('telefone').value = config.telefone || '';
+      document.getElementById('email').value = config.email || '';
+      document.getElementById('endereco').value = config.endereco || '';
+
+      atualizarPreview();
+    }
+
+    // Salvar configurações
+    document.getElementById('configComunicacaoForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const whatsapp = document.getElementById('whatsapp').value.trim();
+      
+      if (!CryptoService.validatePhone(whatsapp)) {
+        alert('Número de WhatsApp inválido');
+        return;
+      }
+
+      const config = {
+        whatsapp: whatsapp,
+        mensagemPadrao: document.getElementById('mensagemPadrao').value.trim(),
+        whatsappFlutuante: document.getElementById('whatsappFlutuante').checked,
+        whatsappMensagemFlutuante: document.getElementById('whatsappMensagemFlutuante').value.trim(),
+        whatsappMensagemInicial: document.getElementById('whatsappMensagemInicial').value.trim(),
+        
+        exibirHorario: document.getElementById('exibirHorario').checked,
+        horarioSegSexInicio: document.getElementById('horarioSegSexInicio').value,
+        horarioSegSexFim: document.getElementById('horarioSegSexFim').value,
+        horarioSabInicio: document.getElementById('horarioSabInicio').value,
+        horarioSabFim: document.getElementById('horarioSabFim').value,
+        atendeDomingo: document.getElementById('atendeDOM').checked,
+        mensagemForaHorario: document.getElementById('mensagemForaHorario').value.trim(),
+        
+        telefone: document.getElementById('telefone').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        endereco: document.getElementById('endereco').value.trim()
+      };
+
+      const result = await ConfigService.salvar(config);
+
+      if (result.success) {
+        alert('✅ Configurações salvas com sucesso!');
+      } else {
+        alert('❌ Erro ao salvar configurações');
+      }
+    });
+
+    // Inicializar
+    carregarConfiguracoes();
+  </script>
+</body>
+</html>
