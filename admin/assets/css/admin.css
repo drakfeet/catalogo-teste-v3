@@ -2768,3 +2768,300 @@ a, button, input, select, textarea {
 /* ========================================
    FIM DO CSS ADMIN PRINCIPAL
 ======================================== */
+
+/* ========================================
+   ADMIN EXTENSÕES CSS V3
+   Estilos adicionais para novos componentes
+======================================== */
+
+/* ========================================
+   PREVIEW MENU ITEMS
+======================================== */
+.preview-menu-items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: var(--space-lg);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  min-height: 200px;
+}
+
+.preview-menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-base);
+  cursor: pointer;
+}
+
+.preview-menu-item:hover {
+  background: var(--bg-elevated);
+  border-color: var(--primary);
+  transform: translateX(4px);
+}
+
+.preview-menu-item.destacado {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+  border-color: var(--primary);
+  font-weight: 600;
+}
+
+.preview-icone {
+  font-size: 20px;
+  min-width: 24px;
+}
+
+.preview-texto {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.preview-badge {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+/* ========================================
+   TAGS
+======================================== */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+/* ========================================
+   PREVIEW REDES SOCIAIS
+======================================== */
+.preview-social-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  min-height: 150px;
+  justify-content: center;
+}
+
+.preview-social-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-lg);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-base);
+  cursor: pointer;
+  min-width: 100px;
+}
+
+.preview-social-item:hover {
+  background: var(--bg-elevated);
+  border-color: var(--primary);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.preview-social-icon {
+  font-size: 32px;
+}
+
+.preview-social-nome {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+/* ========================================
+   MOBILE RESPONSIVE
+======================================== */
+@media (max-width: 768px) {
+  .preview-menu-items {
+    padding: var(--space-md);
+  }
+
+  .preview-menu-item {
+    padding: var(--space-sm);
+  }
+
+  .preview-social-items {
+    padding: var(--space-md);
+    gap: var(--space-sm);
+  }
+
+  .preview-social-item {
+    padding: var(--space-md);
+    min-width: 80px;
+  }
+
+  .preview-social-icon {
+    font-size: 24px;
+  }
+}
+/* ========================================
+   ADMIN EXTENSÕES CSS V3
+   Estilos adicionais para novos componentes
+======================================== */
+
+/* ========================================
+   PREVIEW MENU ITEMS
+======================================== */
+.preview-menu-items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: var(--space-lg);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  min-height: 200px;
+}
+
+.preview-menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-base);
+  cursor: pointer;
+}
+
+.preview-menu-item:hover {
+  background: var(--bg-elevated);
+  border-color: var(--primary);
+  transform: translateX(4px);
+}
+
+.preview-menu-item.destacado {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+  border-color: var(--primary);
+  font-weight: 600;
+}
+
+.preview-icone {
+  font-size: 20px;
+  min-width: 24px;
+}
+
+.preview-texto {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.preview-badge {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+/* ========================================
+   TAGS
+======================================== */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+/* ========================================
+   PREVIEW REDES SOCIAIS
+======================================== */
+.preview-social-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  min-height: 150px;
+  justify-content: center;
+}
+
+.preview-social-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-lg);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-base);
+  cursor: pointer;
+  min-width: 100px;
+}
+
+.preview-social-item:hover {
+  background: var(--bg-elevated);
+  border-color: var(--primary);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.preview-social-icon {
+  font-size: 32px;
+}
+
+.preview-social-nome {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+/* ========================================
+   MOBILE RESPONSIVE
+======================================== */
+@media (max-width: 768px) {
+  .preview-menu-items {
+    padding: var(--space-md);
+  }
+
+  .preview-menu-item {
+    padding: var(--space-sm);
+  }
+
+  .preview-social-items {
+    padding: var(--space-md);
+    gap: var(--space-sm);
+  }
+
+  .preview-social-item {
+    padding: var(--space-md);
+    min-width: 80px;
+  }
+
+  .preview-social-icon {
+    font-size: 24px;
+  }
+}

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Redes Sociais - Admin</title>
+  <link rel="stylesheet" href="../assets/css/admin.css">
+  <link rel="stylesheet" href="../assets/css/admin-mobile.css">
+</head>
+<body>
+  <div class="admin-layout">
+    <!-- Menu Hambúrguer (Mobile) -->
+    <button class="btn-menu-toggle-admin" id="menuToggleAdmin" aria-label="Abrir menu" aria-expanded="false">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+
+    <!-- Overlay do Menu -->
+    <div class="menu-overlay-admin" id="menuOverlayAdmin"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="adminSidebar">
+      <div class="sidebar-header">
+        <h2>📦 Admin</h2>
+        <button class="btn-close-sidebar" id="btnCloseSidebar" aria-label="Fechar menu">
+          <span>✕</span>
+        </button>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="../index.html" class="nav-item">
+          <span class="icon">📊</span>
+          <span>Dashboard</span>
+        </a>
+        <a href="../produtos.html" class="nav-item">
+          <span class="icon">📦</span>
+          <span>Produtos</span>
+        </a>
+        <a href="../metricas.html" class="nav-item">
+          <span class="icon">📈</span>
+          <span>Métricas</span>
+        </a>
+        
+        <!-- Submenu Configurações -->
+        <div class="nav-submenu">
+          <span class="nav-submenu-title">⚙️ Configurações</span>
+          <a href="visual.html" class="nav-item-sub">
+            <span class="icon">🎨</span>
+            <span>Visual</span>
+          </a>
+          <a href="produtos.html" class="nav-item-sub">
+            <span class="icon">📦</span>
+            <span>Produtos</span>
+          </a>
+          <a href="banners.html" class="nav-item-sub">
+            <span class="icon">🖼️</span>
+            <span>Banners</span>
+          </a>
+          <a href="menu-links.html" class="nav-item-sub">
+            <span class="icon">🔗</span>
+            <span>Menu & Links</span>
+          </a>
+          <a href="redes-sociais.html" class="nav-item-sub active">
+            <span class="icon">📱</span>
+            <span>Redes Sociais</span>
+          </a>
+          <a href="pagamento.html" class="nav-item-sub">
+            <span class="icon">💳</span>
+            <span>Pagamento</span>
+          </a>
+          <a href="comunicacao.html" class="nav-item-sub">
+            <span class="icon">💬</span>
+            <span>Comunicação</span>
+          </a>
+          <a href="tracking.html" class="nav-item-sub">
+            <span class="icon">📊</span>
+            <span>Tracking</span>
+          </a>
+        </div>
+        
+        <a href="https://catalogo.drakfeet.com" class="nav-item" target="_blank">
+          <span class="icon">🌐</span>
+          <span>Ver Catálogo</span>
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <button id="logoutBtn" class="btn-logout">Sair</button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="topbar">
+        <h1>📱 Redes Sociais</h1>
+        <div class="topbar-actions">
+          <button class="btn-theme-toggle-admin" id="themeToggleAdmin" aria-label="Alternar tema">
+            <span class="theme-icon">🌙</span>
+          </button>
+        </div>
+      </header>
+
+      <div class="container">
+        
+        <!-- Redes Sociais -->
+        <div class="config-section">
+          <div class="section-header">
+            <h2>📱 Gerenciar Redes Sociais</h2>
+            <button type="button" class="btn btn-primary" id="btnNovaRede">➕ Adicionar Rede Social</button>
+          </div>
+
+          <div class="info-box">
+            <h4>ℹ️ Sobre Redes Sociais</h4>
+            <ul>
+              <li>Configure as redes sociais exibidas no rodapé do catálogo</li>
+              <li>Ícones e nomes são preenchidos automaticamente</li>
+              <li>Organize a ordem de exibição</li>
+              <li>Redes disponíveis: Instagram, Facebook, TikTok, Twitter, YouTube, LinkedIn, WhatsApp, Pinterest</li>
+            </ul>
+          </div>
+
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th style="width: 80px;">Ordem</th>
+                  <th style="width: 60px;">Ícone</th>
+                  <th>Rede Social</th>
+                  <th>URL/Link</th>
+                  <th>Status</th>
+                  <th style="width: 120px;">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="redesTableBody">
+                <tr>
+                  <td colspan="6" style="text-align: center; padding: 40px;">
+                    Carregando redes sociais...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Preview Redes Sociais -->
+        <div class="config-section">
+          <h2>👁️ Pré-visualização do Rodapé</h2>
+          <div class="preview-container">
+            <div class="preview-box">
+              <div class="preview-header">
+                <h3>Siga-nos nas Redes Sociais</h3>
+              </div>
+              <div class="preview-social-items" id="previewRedesItems">
+                <!-- Gerado via JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal Rede Social -->
+  <div class="modal" id="modalRede" style="display: none;">
+    <div class="modal-overlay" onclick="fecharModalRede()"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalRedeTitulo">Nova Rede Social</h3>
+        <button class="btn-fechar" onclick="fecharModalRede()">✕</button>
+      </div>
+      
+      <form id="formRede" class="modal-body">
+        <input type="hidden" id="redeId">
+        
+        <div class="form-group">
+          <label for="redeTipo">Rede Social *</label>
+          <select id="redeTipo" required>
+            <option value="">Selecione uma rede</option>
+            <option value="instagram">📷 Instagram</option>
+            <option value="facebook">📘 Facebook</option>
+            <option value="tiktok">🎵 TikTok</option>
+            <option value="twitter">🐦 Twitter/X</option>
+            <option value="youtube">📺 YouTube</option>
+            <option value="linkedin">💼 LinkedIn</option>
+            <option value="whatsapp">💬 WhatsApp</option>
+            <option value="pinterest">📌 Pinterest</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="redeUrl">URL/Link *</label>
+          <input type="text" id="redeUrl" required placeholder="https://instagram.com/seuusuario">
+          <small id="redeUrlHelper">Digite a URL completa do seu perfil</small>
+        </div>
+
+        <div class="form-group">
+          <label for="redeOrdem">Ordem de Exibição *</label>
+          <input type="number" id="redeOrdem" required min="0" value="0">
+          <small>Menor número = aparece primeiro</small>
+        </div>
+
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="redeAtivo" checked>
+            Rede Social Ativa
+          </label>
+        </div>
+
+        <div class="modal-actions">
+          <button type="submit" class="btn btn-primary">💾 Salvar</button>
+          <button type="button" class="btn btn-secondary" onclick="fecharModalRede()">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  
+  <!-- Theme Service -->
+  <script>
+    if (!window.ThemeService) {
+      window.ThemeService = {
+        currentTheme: 'dark',
+        init() {
+          const savedTheme = localStorage.getItem('theme');
+          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          this.currentTheme = savedTheme || (prefersDark ? 'dark' : 'light');
+          this.applyTheme(this.currentTheme);
+        },
+        applyTheme(theme) {
+          this.currentTheme = theme;
+          document.documentElement.setAttribute('data-theme', theme);
+          localStorage.setItem('theme', theme);
+          this.updateToggleIcon();
+        },
+        toggle() {
+          const newTheme = this.currentTheme === 'dark' ? 'light' : 'dark';
+          this.applyTheme(newTheme);
+          return newTheme;
+        },
+        updateToggleIcon() {
+          const toggleBtn = document.getElementById('themeToggleAdmin');
+          if (toggleBtn) {
+            const icon = toggleBtn.querySelector('.theme-icon') || toggleBtn;
+            icon.textContent = this.currentTheme === 'dark' ? '☀️' : '🌙';
+          }
+        }
+      };
+    }
+  </script>
+  
+  <script src="../assets/js/config.js"></script>
+  <script src="../assets/js/crypto.service.js"></script>
+  <script src="../assets/js/firebase.js"></script>
+  <script src="../assets/js/auth.core.js"></script>
+  <script src="../assets/js/auth.guard.js"></script>
+  <script src="../assets/js/session.manager.js"></script>
+  <script src="../assets/js/redes-sociais.service.js"></script>
+
+  <script src="../assets/js/redes-sociais.ui.js"></script>
+
+</body>
+</html>

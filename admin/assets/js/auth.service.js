@@ -1,221 +1,436 @@
 /**
- * UI de Configurações
- * Gerencia abas e formulário
+ * AuthService - Serviço de Autenticação
+ * Gerencia login, logout e estado de autenticação
+ * IMPORTANTE: Este arquivo é o serviço principal de autenticação
+ * Para implementações específicas, use auth.core.js
  */
 
-document.addEventListener('DOMContentLoaded', () => {
+const AuthService = {
+  
+  /**
+   * Tentativas de login (controle de segurança)
+   */
+  loginAttempts: {},
+  
+  /**
+   * Configuração de segurança
+   */
+  securityConfig: {
+    maxAttempts: 5,
+    lockoutDuration: 15 * 60 * 1000 // 15 minutos
+  },
 
-  // ⚠️ Se não estiver na página de configurações, não executa nada
-  const configForm = document.getElementById('configForm');
-  if (!configForm) return;
+  /**
+   * Login com email e senha
+   * @param {string} email 
+   * @param {string} password 
+   * @returns {Promise<Object>}
+   */
+  async login(email, password) {
+    try {
+      // Verificar tentativas de login
+      if (this.isAccountLocked(email)) {
+        const remainingTime = this.getRemainingLockTime(email);
+        return {
+          success: false,
+          error: `Conta bloqueada temporariamente. Tente novamente em ${Math.ceil(remainingTime / 60000)} minutos.`
+        };
+      }
 
-  /* =========================
-     SISTEMA DE ABAS
-  ========================== */
-  document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const tab = btn.dataset.tab;
+      console.info('🔐 Tentando autenticação...');
+      
+      // Autenticar com Firebase
+      const result = await firebase
+        .auth()
+        .signInWithEmailAndPassword(email, password);
 
-      // Atualizar botões
-      document.querySelectorAll('.tab-btn')
-        .forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
+      // Limpar tentativas após login bem-sucedido
+      this.clearLoginAttempts(email);
+      
+      console.info('✅ Login realizado com sucesso');
+      
+      // Registrar log de auditoria (opcional)
+      await this.logAuditEvent('login', result.user.uid);
 
-      // Atualizar painéis
-      document.querySelectorAll('.tab-pane')
-        .forEach(pane => pane.classList.remove('active'));
+      return {
+        success: true,
+        user: result.user
+      };
 
-      const painel = document.querySelector(`[data-pane="${tab}"]`);
-      if (painel) painel.classList.add('active');
+    } catch (error) {
+      console.error('❌ Erro no login:', error);
+
+      // Registrar tentativa falhada
+      this.registerFailedAttempt(email);
+
+      let message = 'Erro ao fazer login';
+
+      switch (error.code) {
+        case 'auth/user-not-found':
+          message = 'Usuário não encontrado';
+          break;
+        case 'auth/wrong-password':
+          message = 'Senha incorreta';
+          break;
+        case 'auth/invalid-email':
+          message = 'Email inválido';
+          break;
+        case 'auth/too-many-requests':
+          message = 'Muitas tentativas. Tente novamente mais tarde';
+          break;
+        case 'auth/network-request-failed':
+          message = 'Erro de conexão. Verifique sua internet';
+          break;
+        case 'auth/invalid-credential':
+          message = 'Credenciais inválidas';
+          break;
+        default:
+          message = error.message || 'Erro desconhecido';
+      }
+
+      return {
+        success: false,
+        error: message
+      };
+    }
+  },
+
+  /**
+   * Retorna usuário atual autenticado
+   * @returns {Promise<Object|null>}
+   */
+  getCurrentUser() {
+    return new Promise((resolve) => {
+      const unsubscribe = firebase.auth().onAuthStateChanged(user => {
+        unsubscribe();
+        resolve(user || null);
+      });
     });
-  });
+  },
 
-  /* =========================
-     CARREGAR CONFIGURAÇÕES
-  ========================== */
-  async function carregarConfiguracoes() {
-    ProdutosUI.mostrarLoading('Carregando configurações...');
+  /**
+   * Verifica se usuário está autenticado
+   * @returns {Promise<boolean>}
+   */
+  async isAuthenticated() {
+    const user = await this.getCurrentUser();
+    return user !== null;
+  },
 
-    const config = await ConfigService.buscar();
-
-    ProdutosUI.esconderLoading();
-
-    // Aba Geral
-    document.getElementById('nomeLoja').value = config.nomeLoja || '';
-    document.getElementById('whatsapp').value = config.whatsapp || '';
-    document.getElementById('taxaMotoboy').value = config.taxaMotoboy || 8.00;
-
-    // Aba Visual
-    document.getElementById('logoUrl').value = config.logoUrl || '';
-    document.getElementById('avisoTexto').value = config.avisoTexto || '';
-    document.getElementById('avisoBotaoTexto').value =
-      config.avisoBotaoTexto || 'Visitar Loja Online';
-    document.getElementById('avisoBotaoUrl').value = config.avisoBotaoUrl || '';
-
-    if (config.logoUrl) {
-      mostrarPreviewLogo(config.logoUrl);
-    }
-
-    // Aba Produtos
-    if (Array.isArray(config.menuCategorias)) {
-      document.getElementById('menuCategorias').value =
-        config.menuCategorias.join('\n');
-    }
-
-    if (Array.isArray(config.marcasCadastradas)) {
-      document.getElementById('marcasCadastradas').value =
-        config.marcasCadastradas.join('\n');
-    }
-
-    if (Array.isArray(config.categoriasCadastradas)) {
-      document.getElementById('categoriasCadastradas').value =
-        config.categoriasCadastradas.join('\n');
-    }
-
-    // Aba Pagamento
-    document.getElementById('descontoPix').value = config.descontoPix || 10;
-    document.getElementById('parcelasSemJuros').value =
-      config.parcelasSemJuros || 3;
-
-    // Aba Comunicação
-    document.getElementById('mensagemPadrao').value =
-      config.mensagemPadrao || '';
-    document.getElementById('whatsappFlutuante').checked =
-      config.whatsappFlutuante !== false;
-    document.getElementById('whatsappMensagemFlutuante').value =
-      config.whatsappMensagemFlutuante || 'Precisa de Ajuda?';
-
-    // Aba Tracking
-    document.getElementById('pixelFacebook').value =
-      config.pixelFacebook || '';
-    document.getElementById('gtmGoogle').value = config.gtmGoogle || '';
-    document.getElementById('googleAnalytics').value =
-      config.googleAnalytics || '';
-  }
-
-  /* =========================
-     UPLOAD DE LOGO
-  ========================== */
-  const logoUpload = document.getElementById('logoUpload');
-  if (logoUpload) {
-    logoUpload.addEventListener('change', async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      if (!file.type.startsWith('image/')) {
-        ProdutosUI.mostrarMensagem('Selecione apenas imagens', 'error');
-        return;
+  /**
+   * Logout do usuário
+   * @returns {Promise<void>}
+   */
+  async logout() {
+    try {
+      console.info('🚪 Realizando logout...');
+      
+      const user = await this.getCurrentUser();
+      
+      // Registrar log de auditoria (opcional)
+      if (user) {
+        await this.logAuditEvent('logout', user.uid);
       }
 
-      if (file.size > 2 * 1024 * 1024) {
-        ProdutosUI.mostrarMensagem(
-          'Imagem muito grande. Máximo 2MB',
-          'error'
-        );
-        return;
-      }
+      await firebase.auth().signOut();
+      
+      console.info('✅ Logout realizado');
+      
+      // Limpar dados locais
+      this.clearLocalData();
+      
+      // Redirecionar para login
+      window.location.href = '/admin/login.html';
+      
+    } catch (error) {
+      console.error('❌ Erro ao fazer logout:', error);
+      // Mesmo com erro, redirecionar para segurança
+      window.location.href = '/admin/login.html';
+    }
+  },
 
-      try {
-        ProdutosUI.mostrarLoading('Enviando logo...');
-        const url = await ProdutosService.uploadImagem(file);
-        ProdutosUI.esconderLoading();
-
-        document.getElementById('logoUrl').value = url;
-        mostrarPreviewLogo(url);
-
-        ProdutosUI.mostrarMensagem(
-          'Logo enviada com sucesso!',
-          'success'
-        );
-      } catch (error) {
-        ProdutosUI.esconderLoading();
-        ProdutosUI.mostrarMensagem(
-          'Erro ao enviar logo',
-          'error'
-        );
-      }
-    });
-  }
-
-  function mostrarPreviewLogo(url) {
-    const preview = document.getElementById('logoPreview');
-    if (!preview) return;
-
-    preview.innerHTML = `<img src="${url}" alt="Logo">`;
-    preview.style.display = 'block';
-  }
-
-  /* =========================
-     SALVAR CONFIGURAÇÕES
-  ========================== */
-  configForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const processarLista = (texto) =>
-      texto.split('\n')
-        .map(item => item.trim())
-        .filter(item => item.length > 0);
-
-    const config = {
-      nomeLoja: document.getElementById('nomeLoja').value.trim(),
-      whatsapp: document.getElementById('whatsapp').value.trim(),
-      taxaMotoboy:
-        parseFloat(document.getElementById('taxaMotoboy').value) || 0,
-
-      logoUrl: document.getElementById('logoUrl').value.trim(),
-      avisoTexto: document.getElementById('avisoTexto').value.trim(),
-      avisoBotaoTexto:
-        document.getElementById('avisoBotaoTexto').value.trim(),
-      avisoBotaoUrl:
-        document.getElementById('avisoBotaoUrl').value.trim(),
-
-      menuCategorias:
-        processarLista(document.getElementById('menuCategorias').value),
-      marcasCadastradas:
-        processarLista(document.getElementById('marcasCadastradas').value),
-      categoriasCadastradas:
-        processarLista(document.getElementById('categoriasCadastradas').value),
-
-      descontoPix:
-        parseInt(document.getElementById('descontoPix').value) || 10,
-      parcelasSemJuros:
-        parseInt(document.getElementById('parcelasSemJuros').value) || 1,
-
-      mensagemPadrao:
-        document.getElementById('mensagemPadrao').value.trim(),
-      whatsappFlutuante:
-        document.getElementById('whatsappFlutuante').checked,
-      whatsappMensagemFlutuante:
-        document.getElementById('whatsappMensagemFlutuante').value.trim(),
-
-      pixelFacebook:
-        document.getElementById('pixelFacebook').value.trim(),
-      gtmGoogle:
-        document.getElementById('gtmGoogle').value.trim(),
-      googleAnalytics:
-        document.getElementById('googleAnalytics').value.trim()
-    };
-
-    if (!ConfigService.validarWhatsApp(config.whatsapp)) {
-      ProdutosUI.mostrarMensagem(
-        'Número de WhatsApp inválido',
-        'error'
-      );
-      return;
+  /**
+   * Registra tentativa de login falhada
+   * @param {string} email 
+   */
+  registerFailedAttempt(email) {
+    if (!this.loginAttempts[email]) {
+      this.loginAttempts[email] = {
+        count: 0,
+        lastAttempt: Date.now()
+      };
     }
 
-    ProdutosUI.mostrarLoading('Salvando configurações...');
-    const result = await ConfigService.salvar(config);
-    ProdutosUI.esconderLoading();
+    this.loginAttempts[email].count++;
+    this.loginAttempts[email].lastAttempt = Date.now();
 
-    ProdutosUI.mostrarMensagem(
-      result.success
-        ? '✅ Configurações salvas com sucesso!'
-        : '❌ Erro ao salvar configurações',
-      result.success ? 'success' : 'error'
-    );
-  });
+    // Salvar em localStorage para persistência
+    try {
+      localStorage.setItem('loginAttempts', JSON.stringify(this.loginAttempts));
+    } catch (e) {
+      console.warn('Não foi possível salvar tentativas de login');
+    }
+  },
 
-  // 🚀 Inicialização
-  carregarConfiguracoes();
-});
+  /**
+   * Limpa tentativas de login após sucesso
+   * @param {string} email 
+   */
+  clearLoginAttempts(email) {
+    delete this.loginAttempts[email];
+    try {
+      localStorage.setItem('loginAttempts', JSON.stringify(this.loginAttempts));
+    } catch (e) {
+      console.warn('Não foi possível limpar tentativas de login');
+    }
+  },
+
+  /**
+   * Verifica se conta está bloqueada
+   * @param {string} email 
+   * @returns {boolean}
+   */
+  isAccountLocked(email) {
+    const attempts = this.loginAttempts[email];
+    
+    if (!attempts) return false;
+    
+    const timeSinceLastAttempt = Date.now() - attempts.lastAttempt;
+    
+    // Se passou o tempo de lockout, limpar tentativas
+    if (timeSinceLastAttempt > this.securityConfig.lockoutDuration) {
+      this.clearLoginAttempts(email);
+      return false;
+    }
+    
+    return attempts.count >= this.securityConfig.maxAttempts;
+  },
+
+  /**
+   * Retorna tempo restante de bloqueio em ms
+   * @param {string} email 
+   * @returns {number}
+   */
+  getRemainingLockTime(email) {
+    const attempts = this.loginAttempts[email];
+    if (!attempts) return 0;
+    
+    const timeSinceLastAttempt = Date.now() - attempts.lastAttempt;
+    const remaining = this.securityConfig.lockoutDuration - timeSinceLastAttempt;
+    
+    return remaining > 0 ? remaining : 0;
+  },
+
+  /**
+   * Limpa dados locais (localStorage, sessionStorage)
+   */
+  clearLocalData() {
+    try {
+      // Manter apenas loginAttempts e theme
+      const loginAttempts = localStorage.getItem('loginAttempts');
+      const theme = localStorage.getItem('theme');
+      
+      localStorage.clear();
+      sessionStorage.clear();
+      
+      // Restaurar dados que devem persistir
+      if (loginAttempts) {
+        localStorage.setItem('loginAttempts', loginAttempts);
+      }
+      if (theme) {
+        localStorage.setItem('theme', theme);
+      }
+      
+      console.info('🧹 Dados locais limpos');
+    } catch (e) {
+      console.warn('Erro ao limpar dados locais:', e);
+    }
+  },
+
+  /**
+   * Registra evento de auditoria (opcional)
+   * @param {string} tipo 
+   * @param {string} userId 
+   */
+  async logAuditEvent(tipo, userId) {
+    try {
+      await firebaseDb.collection('audit_logs').add({
+        tipo,
+        userId,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        userAgent: navigator.userAgent,
+        ip: null // Preenchido no backend se necessário
+      });
+    } catch (error) {
+      console.warn('Não foi possível registrar log de auditoria:', error);
+    }
+  },
+
+  /**
+   * Recuperar senha
+   * @param {string} email 
+   * @returns {Promise<Object>}
+   */
+  async resetPassword(email) {
+    try {
+      await firebase.auth().sendPasswordResetEmail(email);
+      
+      return {
+        success: true,
+        message: 'Email de recuperação enviado com sucesso!'
+      };
+    } catch (error) {
+      console.error('❌ Erro ao enviar email de recuperação:', error);
+      
+      let message = 'Erro ao enviar email de recuperação';
+      
+      switch (error.code) {
+        case 'auth/user-not-found':
+          message = 'Email não encontrado';
+          break;
+        case 'auth/invalid-email':
+          message = 'Email inválido';
+          break;
+        default:
+          message = error.message;
+      }
+      
+      return {
+        success: false,
+        error: message
+      };
+    }
+  },
+
+  /**
+   * Atualizar perfil do usuário
+   * @param {Object} data 
+   * @returns {Promise<Object>}
+   */
+  async updateProfile(data) {
+    try {
+      const user = firebase.auth().currentUser;
+      
+      if (!user) {
+        return {
+          success: false,
+          error: 'Usuário não autenticado'
+        };
+      }
+
+      await user.updateProfile(data);
+      
+      return {
+        success: true,
+        message: 'Perfil atualizado com sucesso!'
+      };
+    } catch (error) {
+      console.error('❌ Erro ao atualizar perfil:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  },
+
+  /**
+   * Atualizar email
+   * @param {string} newEmail 
+   * @returns {Promise<Object>}
+   */
+  async updateEmail(newEmail) {
+    try {
+      const user = firebase.auth().currentUser;
+      
+      if (!user) {
+        return {
+          success: false,
+          error: 'Usuário não autenticado'
+        };
+      }
+
+      await user.updateEmail(newEmail);
+      
+      return {
+        success: true,
+        message: 'Email atualizado com sucesso!'
+      };
+    } catch (error) {
+      console.error('❌ Erro ao atualizar email:', error);
+      
+      let message = 'Erro ao atualizar email';
+      
+      if (error.code === 'auth/requires-recent-login') {
+        message = 'Faça login novamente para atualizar o email';
+      }
+      
+      return {
+        success: false,
+        error: message
+      };
+    }
+  },
+
+  /**
+   * Atualizar senha
+   * @param {string} newPassword 
+   * @returns {Promise<Object>}
+   */
+  async updatePassword(newPassword) {
+    try {
+      const user = firebase.auth().currentUser;
+      
+      if (!user) {
+        return {
+          success: false,
+          error: 'Usuário não autenticado'
+        };
+      }
+
+      await user.updatePassword(newPassword);
+      
+      return {
+        success: true,
+        message: 'Senha atualizada com sucesso!'
+      };
+    } catch (error) {
+      console.error('❌ Erro ao atualizar senha:', error);
+      
+      let message = 'Erro ao atualizar senha';
+      
+      if (error.code === 'auth/requires-recent-login') {
+        message = 'Faça login novamente para atualizar a senha';
+      } else if (error.code === 'auth/weak-password') {
+        message = 'Senha muito fraca. Use no mínimo 6 caracteres';
+      }
+      
+      return {
+        success: false,
+        error: message
+      };
+    }
+  },
+
+  /**
+   * Inicializar o serviço de autenticação
+   */
+  init() {
+    // Carregar tentativas de login do localStorage
+    try {
+      const stored = localStorage.getItem('loginAttempts');
+      if (stored) {
+        this.loginAttempts = JSON.parse(stored);
+      }
+    } catch (e) {
+      console.warn('Não foi possível carregar tentativas de login');
+    }
+
+    console.info('🔐 AuthService inicializado');
+  }
+};
+
+// Inicializar automaticamente
+AuthService.init();
+
+// Exportar globalmente
+window.AuthService = AuthService;
